@@ -20,5 +20,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Usuarios (CREATE e um pouco de Read)
     path('usuarios/', include('usuarios.urls')),
+
+#     # Read  e flashcards
+#     path('', include('flashcard.urls')),
 ]
