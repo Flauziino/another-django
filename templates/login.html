@@ -1,10 +1,12 @@
-{% extends "base.html" %}
-{% load static %}
-{% block 'cabecalho' %}
-    <link rel="stylesheet" href="{% static "geral/usuarios/css/cadastro.css" %}">
-{% endblock 'cabecalho' %}
+{% extends 'base.html' %}
 
+{% load static %}
+
+{% block 'cabecalho' %}
+ <link href="{% static "geral/usuarios/css/cadastro.css" %}" rel="stylesheet">
+{% endblock %}
 {% block 'conteudo' %}
+
     <div class="bg1">
         <div class="container">
             <div class="row">
@@ -34,25 +36,21 @@
                         <div class="circle c3"></div>
                     </div>
                     <br>
-                    <h3>Cadastre-se</h3>
+                    <h3>Logar</h3>
                     {% if messages %}
                         {% for message in messages %}
-                            <section class='alert {{message.tags}}'>
-                                {{ message }}
+                            <section class="alert {{message.tags}}">
+                                {{message}}
                             </section>
                         {% endfor %}
                     {% endif %}
-                    <form action="{% url "cadastro" %}" method="POST">{% csrf_token %}
+                    <form action="{% url 'login' %}" method="POST">{% csrf_token %}
                         <label>Username</label>
                         <input type="text" class="input-form" name="username" id="">
                         <br>
                         <br>
                         <label>Senha</label>
                         <input type="password" class="input-form" name="senha" id="">
-                        <br>
-                        <br>
-                        <label>Confirmar senha</label>
-                        <input type="password" class="input-form" name="confirmar_senha" id="">
                         <br>
                         <br>
                         <input type="submit" value="Enviar" class="btn-cadastro">
@@ -64,6 +62,7 @@
                 </div>
             </div>
         </div>
-        </div>
     </div>
+    </div>
+
 {% endblock 'conteudo' %}
