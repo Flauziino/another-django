@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.messages import constants
 from django.contrib import messages
@@ -46,6 +45,11 @@ def cadastro(request):
             User.objects.create_user(
                 username=username,
                 password=senha
+            )
+            messages.add_message(
+                request,
+                constants.SUCCESS,
+                f'Usuario criado {request.user} com sucesso'
             )
             return redirect(reverse('login'))
 

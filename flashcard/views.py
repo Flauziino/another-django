@@ -11,7 +11,7 @@ def novo_flashcard(request):
     if request.method == 'GET':
         categoria = Categoria.objects.all()
         dificuldade = Flashcard.DIFICULDADE_CHOICES
-        flashcards = Flashcard.objects.filter(user=request.user)
+        flashcards = Flashcard.objects.all()
 
         categoria_filtrar = request.GET.get('categoria')
         dificuldade_filtrar = request.GET.get('dificuldade')
@@ -70,14 +70,20 @@ def novo_flashcard(request):
 
 def deletar_flashcard(request, id):
     flashcard = Flashcard.objects.get(id=id)
-    flashcard.delete()
 
+    if request.user.id != flashcard.user.id:
+        messages.add_message(
+            request,
+            constants.ERROR,
+            'Voce nao pode deletar esse flashcard!'
+        )
+        return redirect('/flashcard/novo_flashcard')
+
+    flashcard.delete()
     messages.add_message(
         request,
         constants.SUCCESS,
         'Flashcard deletado com sucesso!'
     )
 
-    return redirect(
-        '/flashcard/novo_flashcard'
-    )
+    return redirect('/flashcard/novo_flashcard')
