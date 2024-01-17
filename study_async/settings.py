@@ -57,7 +57,7 @@ ROOT_URLCONF = 'study_async.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['D:\\Otas paradas V\\Djangow\\templates'],
+        'DIRS': ['D:\\Otas paradas V\\projetos e afins\\Djangow\\templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

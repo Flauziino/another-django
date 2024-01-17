@@ -23,6 +23,6 @@ urlpatterns = [
     # Usuarios (CREATE e um pouco de Read)
     path('usuarios/', include('usuarios.urls')),
 
-#     # Read  e flashcards
-#     path('', include('flashcard.urls')),
+    # Read  e flashcards
+    path('flashcard/', include('flashcard.urls')),
 ]
