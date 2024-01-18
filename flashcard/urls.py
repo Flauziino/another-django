@@ -10,4 +10,7 @@ urlpatterns = [
         name="deletar_flashcard"
     ),
     path('iniciar_desafio/', views.iniciar_desafio, name='iniciar_desafio'),
+    path('listar_desafio/', views.listar_desafio, name='listar_desafio'),
+    path('desafio/<int:id>/', views.desafio, name='desafio'),
+
 ]

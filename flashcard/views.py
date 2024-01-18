@@ -139,4 +139,50 @@ def iniciar_desafio(request):
             desafio.flashcards.add(flashcard_desafio)
 
         desafio.save()
-        return redirect(f'/flashcard/desafio/{desafio.id}')
+        return redirect('/flashcard/listar_desafio/')
+
+
+def listar_desafio(request):
+    if request.method == 'GET':
+        desafios = Desafio.objects.filter(user=request.user)
+        status = FlashcardDesafio.objects.all()
+        categorias = Categoria.objects.all()
+        dificuldades = Flashcard.DIFICULDADE_CHOICES
+
+        categoria_filtrar = request.GET.get('categoria')
+        dificuldade_filtrar = request.GET.get('dificuldade')
+
+        if categoria_filtrar:
+            desafios = desafios.filter(
+                categoria__id=categoria_filtrar
+            )
+
+        if dificuldade_filtrar:
+            desafios = desafios.filter(
+                dificuldade=dificuldade_filtrar
+            )
+
+        # talvez esse status vai precisar de um loop
+        return render(
+            request,
+            'listar_desafio.html',
+            {
+                'desafios': desafios,
+                'status': status,
+                'categorias': categorias,
+                'dificuldades': dificuldades,
+            },
+            )
+
+
+def desafio(request, id):
+    desafio = Desafio.objects.get(id=id)
+
+    if request.method == 'GET':
+        return render(
+            request,
+            'desafio.html',
+            {
+                'desafio': desafio,
+            },
+        )

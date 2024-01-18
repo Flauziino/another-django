@@ -118,16 +118,6 @@
  </div>
  </div>
 
- <script>
-    function flip_card(id){
-        card = document.getElementById(id)
-
-        if(card.style.display == 'none' || card.style.display == ''){
-            card.style.display = 'block'
-        }else{
-            card.style.display = 'none'
-        }
-    }
- </script>
+ <script src="{% static 'geral/flashcard/js/flashcard.js' %}"></script>
 
 {% endblock 'conteudo' %}
