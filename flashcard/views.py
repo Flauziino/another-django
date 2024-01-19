@@ -227,3 +227,37 @@ def responder_flashcard(request, id):
     return redirect(
         f'/flashcard/desafio/{desafio_id}/'
         )
+
+
+def relatorio(request, id):
+    desafio = Desafio.objects.get(id=id)
+
+    acertos = desafio.flashcards.filter(acertou=True).count()
+    erros = desafio.flashcards.filter(acertou=False).count()
+
+    dados = [acertos, erros]
+
+    categorias = desafio.categoria.all()
+
+    nome_categoria = []
+    for i in categorias:
+        nome_categoria.append(i.nome)
+
+    dados2 = []
+    for categoria in categorias:
+        dados2.append(
+            desafio.flashcards.filter(flashcard__categoria=categoria)
+            .filter(acertou=True)
+            .count()
+        )
+
+    return render(
+        request,
+        'relatorio.html',
+        {
+            'desafio': desafio,
+            'dados': dados,
+            'categorias': nome_categoria,
+            'dados2': dados2
+        },
+    )
