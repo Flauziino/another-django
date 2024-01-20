@@ -3,6 +3,8 @@ from .models import Categoria, Flashcard, FlashcardDesafio, Desafio
 from django.contrib.messages import constants
 from django.contrib import messages
 from django.http import Http404
+from django.db.models import Subquery, OuterRef, Count, Value
+from django.db.models.functions import Coalesce
 
 
 def novo_flashcard(request):
@@ -239,9 +241,96 @@ def relatorio(request, id):
 
     categorias = desafio.categoria.all()
 
+    melhores = []
+    piores = []
+
+    categorias_com_dados = desafio.categoria.annotate(
+        total_flashcards=Count('flashcard'),
+        acertos=Coalesce(
+            Subquery(
+                desafio.flashcards.filter(
+                    flashcard__categoria=OuterRef('pk'), acertou=True
+                )
+                .values('flashcard__categoria')
+                .annotate(acertos=Count('id'))
+                .values('acertos')[:1]
+            ),
+            Value(0)
+        ),
+        erros=Coalesce(
+            Subquery(
+                desafio.flashcards.filter(
+                    flashcard__categoria=OuterRef('pk'), acertou=False
+                )
+                .values('flashcard__categoria')
+                .annotate(erros=Count('id'))
+                .values('erros')[:1]
+            ),
+            Value(0)
+        )
+    )
+
+    for categoria in categorias_com_dados:
+        total_flashcards = categoria.total_flashcards
+
+        if total_flashcards > 0:  # Para evitar divisão por zero
+            proporcao_acertos = categoria.acertos / total_flashcards
+
+            if proporcao_acertos >= 0.5:
+                melhores.append(
+                    {
+                        'nome': categoria.nome,
+                        'proporcao_acertos': proporcao_acertos,
+                        'acertos': categoria.acertos,
+                        'erros': categoria.erros
+                    }
+                )
+            else:
+                piores.append(
+                    {
+                        'nome': categoria.nome,
+                        'proporcao_acertos': proporcao_acertos,
+                        'acertos': categoria.acertos,
+                        'erros': categoria.erros
+                    }
+                )
+
+    # Preencher a lista de melhores com elementos vazios se necessário
+    melhores.extend(
+        [{
+            'nome': 'N/A',
+            'proporcao_acertos': 0,
+            'acertos': 0,
+            'erros': 0
+        }] * (3 - len(melhores))
+    )
+
+    # Preencher a lista de piores com elementos vazios se necessário
+    piores.extend(
+        [{
+            'nome': 'N/A',
+            'proporcao_acertos': 0,
+            'acertos': 0,
+            'erros': 0
+        }] * (3 - len(piores))
+    )
+
+    # Classificar listas com base na proporção de acertos
+    melhores = sorted(
+        melhores, key=lambda x: x['proporcao_acertos'], reverse=True
+        )[:3]
+    piores = sorted(
+        piores, key=lambda x: x['proporcao_acertos']
+        )[:3]
+
+    nome_categoria = [i.nome for i in categorias]
+
     nome_categoria = []
     for i in categorias:
         nome_categoria.append(i.nome)
+
+    print(melhores)
+    print(piores)
 
     dados2 = []
     for categoria in categorias:
@@ -258,6 +347,10 @@ def relatorio(request, id):
             'desafio': desafio,
             'dados': dados,
             'categorias': nome_categoria,
-            'dados2': dados2
+            'dados2': dados2,
+            'melhores': melhores,
+            'piores': piores,
+            # 'acerto_categoria': acertos_categoria,
+            # 'erros_categoria': erros_categoria
         },
     )

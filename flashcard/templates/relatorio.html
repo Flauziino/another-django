@@ -7,6 +7,7 @@
     <link href="{% static 'geral/flashcard/css/novo_flashcard.css' %}" rel="stylesheet">
     <link href="{% static 'geral/flashcard/css/iniciar_desafio.css' %}" rel="stylesheet">
     <link href="{% static 'geral/flashcard/css/desafio.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static "geral/flashcard/css/relatorio.css" %}">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
 {% endblock 'cabecalho' %}
@@ -33,7 +34,37 @@
                 </div>
             </div>
         </div>
-
+        <hr>
+        <br>
+        <br>
+        <h2>Melhores matérias</h2>
+        <br>
+        <div class="cont">
+            {% for melhor in melhores %}
+            <div class="box-grd">
+              <div class="box-tittle">{{melhor.nome}}</div>
+              <div class="box-content">
+                <div>Acertos: {{melhor.acertos}}<br>Erros: {{melhor.erros}}</div>
+              </div>
+            </div>
+            {% endfor %}  
+          </div>
+        <br>
+        <br>
+        <h2>Piores matérias</h2>
+        <br>
+        <div class="cont">
+          {% for pior in piores %}
+            <div class="box-grd">
+              <div class="box-tittle">{{pior.nome}}</div>
+              <div class="box-content">
+                <div>Acertos: {{pior.acertos}}<br>Erros: {{pior.erros}}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <br>
+        <br>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     {% comment %} <script src="{% static 'geral/flashcard/js/chart.js' %}"></script> {% endcomment %}
