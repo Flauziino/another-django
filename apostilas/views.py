@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Apostila, ViewApostila
+from .models import Apostila, ViewApostila, Avaliacao
 from django.contrib.messages import constants
 from django.contrib import messages
 
@@ -74,6 +74,42 @@ def adicionar_apostilas(request):
 
 def apostila(request, id):
     apostila = Apostila.objects.get(id=id)
+    total_avaliacoes = Avaliacao.objects.count()
+
+    # Inicializa as variáveis fora dos blocos condicionais
+    proporcao_ruim, proporcao_bom, proporcao_otimo = 0, 0, 0
+    views_unicas, views_totais = 0, 0  # Inicializa as variáveis aqui
+    maior_avaliacao = ''  # Inicializa como string vazia
+
+    if request.method == 'POST':
+        avaliacao = request.POST.get('avaliacao')
+
+        if avaliacao in ['ruim', 'bom', 'otimo']:
+            Avaliacao.objects.create(avaliacao=avaliacao)
+            return redirect('apostila', id=id)
+
+    avaliacoes_ruim = Avaliacao.objects.filter(avaliacao='ruim').count()
+    proporcao_ruim = (
+        avaliacoes_ruim / total_avaliacoes if total_avaliacoes > 0 else 0
+    )
+
+    avaliacoes_bom = Avaliacao.objects.filter(avaliacao='bom').count()
+    proporcao_bom = (
+        avaliacoes_bom / total_avaliacoes if total_avaliacoes > 0 else 0
+    )
+
+    avaliacoes_otimo = Avaliacao.objects.filter(avaliacao='otimo').count()
+    proporcao_otimo = (
+        avaliacoes_otimo / total_avaliacoes if total_avaliacoes > 0 else 0
+    )
+
+    # Encontrar a avaliação com a maior proporção
+    proporcoes = {
+        'ruim': proporcao_ruim,
+        'bom': proporcao_bom,
+        'otimo': proporcao_otimo
+    }
+    maior_avaliacao = max(proporcoes, key=proporcoes.get)
 
     if request.method == "GET":
         view = ViewApostila(
@@ -93,12 +129,17 @@ def apostila(request, id):
             .count()
         )
 
-        return render(
-            request,
-            'apostila.html',
-            {
-                'apostila': apostila,
-                'views_unicas': views_unicas,
-                'views_totais': views_totais,
-            }
-        )
+    return render(
+        request,
+        'apostila.html',
+        {
+            'apostila': apostila,
+            'views_unicas': views_unicas,
+            'views_totais': views_totais,
+            'total_avaliacoes': total_avaliacoes,
+            'proporcao_ruim': proporcao_ruim,
+            'proporcao_bom': proporcao_bom,
+            'proporcao_otimo': proporcao_otimo,
+            'maior_avaliacao': maior_avaliacao,
+        }
+    )

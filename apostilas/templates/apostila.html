@@ -30,13 +30,13 @@
                 <hr>
                 <br>
                 <div>
-                    <h2>Total de avaliações: </h2>
+                    <h2>Total de avaliações: {{total_avaliacoes}}</h2>
                     <br>
                     <br>
-                    <h4>Avaliações: </h4>
+                    <h4>Avaliações: {{maior_avaliacao}}</h4>
                     <hr>
                     <h2>Deixe sua avaliação</h2>
-                    <form action="" method="POST">{% csrf_token %}
+                    <form action="{% url 'apostila' id=apostila.id %}" method="POST">{% csrf_token %}
                         <select name="avaliacao" id="" class='selecta'>
                             <option value="ruim">Ruim</option>
                             <option value="bom">Bom</option>
