@@ -8,6 +8,7 @@
     <link href="{% static 'geral/flashcard/css/iniciar_desafio.css' %}" rel="stylesheet">
     <link href="{% static 'geral/flashcard/css/desafio.css' %}" rel="stylesheet">
     <link href="{% static 'geral/apostilas/css/adicionar_apostilas.css' %}" rel="stylesheet">
+    <link href="{% static 'geral/apostilas/css/apostila.css' %}" rel="stylesheet">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
 {% endblock 'cabecalho' %}
@@ -24,9 +25,27 @@
 
             </div>
             <div class="col-md">
-
-                <p>Views únicas: {{views_unicas}}</p>
-                <p>Views totais: {{views_totais}}</p>
+                <p style="font-size: 24px">Views únicas: {{views_unicas}}</p>
+                <p style="font-size: 24px">Views totais: {{views_totais}}</p>
+                <hr>
+                <br>
+                <div>
+                    <h2>Total de avaliações: </h2>
+                    <br>
+                    <br>
+                    <h4>Avaliações: </h4>
+                    <hr>
+                    <h2>Deixe sua avaliação</h2>
+                    <form action="" method="POST">{% csrf_token %}
+                        <select name="avaliacao" id="" class='selecta'>
+                            <option value="ruim">Ruim</option>
+                            <option value="bom">Bom</option>
+                            <option value="otimo">Otimo</option>
+                        </select>
+                        <br>
+                        <input type="submit" value="Enviar" class="btn-cadastro-2">
+                    </form>
+                </div>
             </div>
         </div>
     </div>

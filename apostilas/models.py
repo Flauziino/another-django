@@ -17,3 +17,16 @@ class ViewApostila(models.Model):
 
     def __str__(self):
         return self.ip
+
+
+class Avaliacao(models.Model):
+    AVALIACAO_CHOICES = [
+        ('ruim', 'Ruim'),
+        ('bom', 'Bom'),
+        ('otimo', 'Otimo'),
+    ]
+
+    avaliacao = models.CharField(max_length=10, choices=AVALIACAO_CHOICES)
+
+    def __str__(self):
+        return self.avaliacao
