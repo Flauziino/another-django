@@ -53,18 +53,40 @@
                       </tr>
                     </thead>
                     <tbody>
-                       
+                    {% if not apostila_tag %}   
                         {% for apostila in apostilas %}
                             <tr class="linha">
                                 <td>{{apostila.titulo}}</td>
                                 <td><a href="{% url "apostila" apostila.id %}" style="color: black; text-decoration: none;" class="btn-cadastro">Abrir</a></td>
                             </tr>
                         {% endfor %}
+                    {% else %}
+                        {% for apostila in apostila_tag %}
+                        <tr class="linha">
+                            <td>{{apostila.titulo}}</td>
+                            <td><a href="{% url "apostila" apostila.id %}" style="color: black; text-decoration: none;" class="btn-cadastro">Abrir</a></td>
+                        </tr>
+                        {% endfor %}    
+                    {% endif %}
                     </tbody>
                   </table>
                   <hr>
                   <p class="fonte-secundaria">Views totais: {{views_totais}}</p>
             </div>
         </div>
+        <br>
+        <br>
+        <br>
+        <hr>
+        <br>
+        <div>
+            <h2>Buscar resumos</h2>
+            <form action="{% url "adicionar_apostilas" %}" method="POST" enctype='multipart/form-data'>{% csrf_token %}
+                <input type="text" name="tags" placeholder="Tags" class="form-control-2">
+                <br>
+                <input type="submit" class="btn-cadastro" value="Buscar">
+            </form>
+        </div>
     </div>
+    
 {% endblock 'conteudo' %}

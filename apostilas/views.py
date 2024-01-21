@@ -5,12 +5,13 @@ from django.contrib import messages
 
 
 def adicionar_apostilas(request):
+    apostilas = Apostila.objects.filter(user=request.user)
+    apostila_tag = None
+    views_totais = (
+        ViewApostila.objects.filter(apostila__user=request.user)
+        .count()
+        )
     if request.method == 'GET':
-        apostilas = Apostila.objects.filter(user=request.user)
-        views_totais = (
-            ViewApostila.objects.filter(apostila__user=request.user)
-            .count()
-            )
 
         return render(
             request,
@@ -22,24 +23,52 @@ def adicionar_apostilas(request):
         )
 
     elif request.method == 'POST':
-        titulo = request.POST.get('titulo')
-        arquivo = request.FILES['arquivo']
+        busca = request.POST.get('tags', '')
+        apostila_tag = Apostila.objects.filter(titulo__icontains=busca)
 
-        apostila = Apostila(
-            user=request.user,
-            titulo=titulo,
-            arquivo=arquivo
+        if 'arquivo' in request.FILES:
+            titulo = request.POST.get('titulo')
+            arquivo = request.FILES['arquivo']
+
+            apostila = Apostila(
+                user=request.user,
+                titulo=titulo,
+                arquivo=arquivo
             )
-        apostila.save()
+            apostila.save()
 
-        messages.add_message(
+            messages.add_message(
+                request,
+                constants.SUCCESS,
+                'Apostila salva com sucesso!'
+            )
+
+        if apostila_tag.exists():
+            messages.add_message(
+                request,
+                constants.SUCCESS,
+                'Apostilas filtradas com sucesso!'
+            )
+
+        else:
+            messages.add_message(
+                request,
+                constants.INFO,
+                'Nenhuma apostila encontrada com as tags fornecidas.'
+            )
+
+            return redirect(
+                'adicionar_apostilas'
+                )
+
+        return render(
             request,
-            constants.SUCCESS,
-            'Apostila salva com sucesso!'
-        )
-
-        return redirect(
-            '/apostilas/adicionar_apostilas/'
+            'adicionar_apostilas.html',
+            {
+                'apostilas': apostilas,
+                'views_totais': views_totais,
+                'apostila_tag': apostila_tag
+            }
         )
 
 

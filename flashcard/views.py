@@ -295,7 +295,8 @@ def relatorio(request, id):
                     }
                 )
 
-    # Preencher a lista de melhores com elementos vazios se necessário
+    # Preencher a lista de melhores com elementos vazios
+    # para manter o html exibindo sempre os 3 melhores
     melhores.extend(
         [{
             'nome': 'N/A',
@@ -305,7 +306,8 @@ def relatorio(request, id):
         }] * (3 - len(melhores))
     )
 
-    # Preencher a lista de piores com elementos vazios se necessário
+    # Preencher a lista de piores com elementos vazios
+    # para manter o html exibindo sempre os 3 piores
     piores.extend(
         [{
             'nome': 'N/A',
