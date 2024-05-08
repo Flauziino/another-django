@@ -10,7 +10,7 @@ def adicionar_apostilas(request):
     views_totais = (
         ViewApostila.objects.filter(apostila__user=request.user)
         .count()
-        )
+    )
     if request.method == 'GET':
 
         return render(
@@ -59,7 +59,7 @@ def adicionar_apostilas(request):
 
             return redirect(
                 'adicionar_apostilas'
-                )
+            )
 
         return render(
             request,
