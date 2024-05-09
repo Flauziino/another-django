@@ -1,7 +1,6 @@
-import os
-
 from django.test import TestCase
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 from apostilas.models import Apostila, Avaliacao, ViewApostila
@@ -16,16 +15,10 @@ class BaseTestMixin(TestCase):
         user.save()
         return user
 
-    def get_arquivo(self):
-        arquivo = 'arquivo.txt'
-
-        with open(arquivo, 'w') as a:
-            a.write('test test')
-        return os.path.abspath(arquivo)
-
     def make_apostila(self):
         user = self.get_user()
-        arquivo = self.get_arquivo()
+        file_content = b'test test'
+        arquivo = SimpleUploadedFile("arquivo.txt", file_content)
 
         apostila = Apostila.objects.create(
             user=user,
