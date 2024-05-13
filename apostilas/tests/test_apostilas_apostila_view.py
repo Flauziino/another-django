@@ -142,3 +142,45 @@ class ApostilaViewTest(BaseTestMixin):
             response,
             reverse('apostila', kwargs={'id': apostila.id})
         )
+
+    def test_apostila_view_method_post_receive_avaliacao_and_create_avaliacao_and_count_correct_maior_avaliacao_and_total_avaliacoes(self):  # noqa:E501
+        apostila = self.make_apostila()
+        user = apostila.user
+        self.client.force_login(user)
+
+        # fazendo a primeira avaliacao
+        data = {
+            'avaliacao': 'bom'
+        }
+
+        url = reverse('apostila', kwargs={'id': apostila.id})
+        self.client.post(url, data=data)
+
+        # fazendo a segunda avaliacao
+        data_2 = {
+            'avaliacao': 'bom'
+        }
+
+        url = reverse('apostila', kwargs={'id': apostila.id})
+        self.client.post(url, data=data_2)
+
+        # fazendo a terceira e ultima avaliacao
+        data_3 = {
+            'avaliacao': 'ruim'
+        }
+
+        url = reverse('apostila', kwargs={'id': apostila.id})
+        response = self.client.post(url, data=data_3, follow=True)
+
+        # conferindo se a maior avaliacao é 'bom', pois foi feita duas vezes
+        # contra uma vez de 'ruim'
+        self.assertEqual(
+            response.context['maior_avaliacao'],
+            'bom'
+        )
+
+        # conferindo se o total de avaliacoes foram 3.
+        self.assertEqual(
+            response.context['total_avaliacoes'],
+            3
+        )
