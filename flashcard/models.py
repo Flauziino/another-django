@@ -12,7 +12,7 @@ class Categoria(models.Model):
 class Flashcard(models.Model):
     DIFICULDADE_CHOICES = (
         ('D', 'Difícil'), ('M', 'Médio'), ('F', 'Fácil')
-        )
+    )
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     pergunta = models.CharField(max_length=100)
     resposta = models.TextField()
@@ -30,6 +30,8 @@ class Flashcard(models.Model):
             return 'flashcard-medio'
         elif self.dificuldade == 'D':
             return 'flashcard-dificil'
+        else:
+            return 'dificuldade-nao-encontrada'
 
 
 class FlashcardDesafio(models.Model):
@@ -49,7 +51,7 @@ class Desafio(models.Model):
     quantidade_perguntas = models.IntegerField()
     dificuldade = models.CharField(
         max_length=1, choices=Flashcard.DIFICULDADE_CHOICES
-        )
+    )
 
     flashcards = models.ManyToManyField(FlashcardDesafio)
 

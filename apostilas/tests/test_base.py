@@ -4,6 +4,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 from apostilas.models import Apostila, Avaliacao, ViewApostila
+from flashcard.models import (
+    Categoria, Flashcard, FlashcardDesafio, Desafio
+)
 
 
 class BaseTestMixin(TestCase):
@@ -45,3 +48,42 @@ class BaseTestMixin(TestCase):
         )
         avaliacao.save()
         return avaliacao
+
+    def make_categoria(self):
+        categoria = Categoria.objects.create(nome='Cat test')
+        categoria.save()
+        return categoria
+
+    def make_flashcard(self):
+        categoria = self.make_categoria()
+        user = self.get_user()
+        flashcard = Flashcard.objects.create(
+            user=user,
+            pergunta='Test?',
+            resposta='yes test',
+            categoria=categoria,
+            dificuldade='M',
+        )
+        flashcard.save()
+        return flashcard
+
+    def make_flashcard_desafio(self):
+        flashcard = self.make_flashcard()
+        flashcard_desafio = FlashcardDesafio.objects.create(
+            flashcard=flashcard,
+        )
+        flashcard_desafio.save()
+        return flashcard_desafio
+
+    def make_desafio(self):
+        fashcard_desafio = self.make_flashcard_desafio()
+        desafio = Desafio.objects.create(
+            user=fashcard_desafio.flashcard.user,
+            titulo='test desafio',
+            quantidade_perguntas='1',
+            dificuldade='M',
+        )
+        desafio.categoria.set([fashcard_desafio.flashcard.categoria])
+        desafio.flashcards.set([fashcard_desafio])
+        desafio.save()
+        return desafio
