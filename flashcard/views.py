@@ -22,7 +22,7 @@ def novo_flashcard(request):
         if categoria_filtrar:
             flashcards = flashcards.filter(
                 categoria__id=categoria_filtrar
-                )
+            )
 
         if dificuldade_filtrar:
             flashcards = flashcards.filter(
@@ -50,7 +50,7 @@ def novo_flashcard(request):
                 request,
                 constants.ERROR,
                 'Preencha os campos de pergunta e resposta',
-                )
+            )
             return redirect('/flashcard/novo_flashcard')
 
         flashcard = Flashcard(
@@ -59,7 +59,7 @@ def novo_flashcard(request):
             resposta=resposta,
             categoria_id=categoria,
             dificuldade=dificuldade,
-            )
+        )
 
         flashcard.save()
 
@@ -175,7 +175,7 @@ def listar_desafio(request):
                 'categorias': categorias,
                 'dificuldades': dificuldades,
             },
-            )
+        )
 
 
 def desafio(request, id):
@@ -228,7 +228,7 @@ def responder_flashcard(request, id):
 
     return redirect(
         f'/flashcard/desafio/{desafio_id}/'
-        )
+    )
 
 
 def relatorio(request, id):
@@ -320,10 +320,10 @@ def relatorio(request, id):
     # Classificar listas com base na proporção de acertos
     melhores = sorted(
         melhores, key=lambda x: x['proporcao_acertos'], reverse=True
-        )[:3]
+    )[:3]
     piores = sorted(
         piores, key=lambda x: x['proporcao_acertos']
-        )[:3]
+    )[:3]
 
     nome_categoria = [i.nome for i in categorias]
 
