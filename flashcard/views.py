@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
 from .models import Categoria, Flashcard, FlashcardDesafio, Desafio
-from django.contrib.messages import constants
-from django.contrib import messages
 from django.http import Http404
-from django.db.models import Subquery, OuterRef, Count, Value
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.messages import constants
 from django.db.models.functions import Coalesce
+from django.db.models import Subquery, OuterRef, Count, Value
 
 
 def novo_flashcard(request):

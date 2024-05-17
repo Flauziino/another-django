@@ -80,7 +80,7 @@ class BaseTestMixin(TestCase):
         desafio = Desafio.objects.create(
             user=fashcard_desafio.flashcard.user,
             titulo='test desafio',
-            quantidade_perguntas='1',
+            quantidade_perguntas=1,
             dificuldade='M',
         )
         desafio.categoria.set([fashcard_desafio.flashcard.categoria])
