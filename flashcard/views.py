@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.messages import constants
 from django.db.models.functions import Coalesce
-from django.db.models import Subquery, OuterRef, Count, Value
+from django.db.models import Q, Count, Value
 
 
 def novo_flashcard(request):
@@ -244,30 +244,12 @@ def relatorio(request, id):
     melhores = []
     piores = []
 
-    categorias_com_dados = desafio.categoria.annotate(
+    categorias_com_dados = categorias.annotate(
         total_flashcards=Count('flashcard'),
-        acertos=Coalesce(
-            Subquery(
-                desafio.flashcards.filter(
-                    flashcard__categoria=OuterRef('pk'), acertou=True
-                )
-                .values('flashcard__categoria')
-                .annotate(acertos=Count('id'))
-                .values('acertos')[:1]
-            ),
-            Value(0)
-        ),
-        erros=Coalesce(
-            Subquery(
-                desafio.flashcards.filter(
-                    flashcard__categoria=OuterRef('pk'), acertou=False
-                )
-                .values('flashcard__categoria')
-                .annotate(erros=Count('id'))
-                .values('erros')[:1]
-            ),
-            Value(0)
-        )
+        acertos=Coalesce(Count('flashcard__flashcarddesafio', filter=Q(
+            flashcard__flashcarddesafio__acertou=True)), Value(0)),
+        erros=Coalesce(Count('flashcard__flashcarddesafio', filter=Q(
+            flashcard__flashcarddesafio__acertou=False)), Value(0))
     )
 
     for categoria in categorias_com_dados:
@@ -330,9 +312,6 @@ def relatorio(request, id):
     nome_categoria = []
     for i in categorias:
         nome_categoria.append(i.nome)
-
-    print(melhores)
-    print(piores)
 
     dados2 = []
     for categoria in categorias:

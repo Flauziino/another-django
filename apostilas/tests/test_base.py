@@ -87,3 +87,15 @@ class BaseTestMixin(TestCase):
         desafio.flashcards.set([fashcard_desafio])
         desafio.save()
         return desafio
+
+    def make_desafio_without_flash(self):
+        user = self.get_user()
+        categoria = self.make_categoria()
+        desafio = Desafio.objects.create(
+            user=user,
+            titulo='test desafio',
+            quantidade_perguntas=1,
+            dificuldade='M',
+        )
+        desafio.categoria.set([categoria])
+        return desafio
