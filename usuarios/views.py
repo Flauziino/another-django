@@ -49,7 +49,7 @@ def cadastro(request):
             messages.add_message(
                 request,
                 constants.SUCCESS,
-                f'Usuario criado {request.user} com sucesso'
+                f'Usuario criado {username} com sucesso'
             )
             return redirect(reverse('login'))
 
@@ -57,7 +57,7 @@ def cadastro(request):
             messages.add_message(
                 request, constants.ERROR, 'Erro interno do servidor'
             )
-            return redirect('usuarios/cadastro')
+            return redirect(reverse('cadastro'))
 
 
 def logar(request):
@@ -65,7 +65,7 @@ def logar(request):
         return render(
             request,
             'login.html'
-            )
+        )
 
     elif request.method == 'POST':
         username = request.POST.get('username')
