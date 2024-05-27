@@ -10,7 +10,7 @@ class NovoFlashcardViewTest(BaseTestMixin):
     def test_novo_flashcard_view_is_correct(self):
         view = resolve(reverse('novo_flashcard'))
 
-        self.assertIs(view.func, views.novo_flashcard)
+        self.assertIs(view.func.view_class, views.NovoFlashcard)
 
     def test_novo_flashcard_view_status_code_302_if_not_auth_user(self):
         url = reverse('novo_flashcard')
@@ -22,7 +22,10 @@ class NovoFlashcardViewTest(BaseTestMixin):
         url = reverse('novo_flashcard')
         response = self.client.get(url, follow=True)
 
-        self.assertRedirects(response, '/usuarios/logar/')
+        self.assertRedirects(
+            response,
+            '/usuarios/logar/?next=/flashcard/novo_flashcard/'
+        )
 
     def test_novo_flashcard_view_with_auth_user_method_get_status_code_200(self):  # noqa:E501
         flashcard = self.make_flashcard()
@@ -110,7 +113,10 @@ class NovoFlashcardViewTest(BaseTestMixin):
         url = reverse('novo_flashcard')
         response = self.client.post(url, follow=True)
 
-        self.assertRedirects(response, '/usuarios/logar/')
+        self.assertRedirects(
+            response,
+            '/usuarios/logar/?next=/flashcard/novo_flashcard/'
+        )
 
     def test_novo_flashcard_view_with_auth_user_method_post_without_pergunta_redirects(self):  # noqa:E501
         flashcard = self.make_flashcard()

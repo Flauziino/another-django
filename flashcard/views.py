@@ -1,17 +1,23 @@
 from .models import Categoria, Flashcard, FlashcardDesafio, Desafio
+
+from django.views import View
 from django.http import Http404
 from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.contrib.messages import constants
-from django.db.models.functions import Coalesce
+
 from django.db.models import Q, Count, Value
+from django.contrib.messages import constants
+from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models.functions import Coalesce
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
 
-def novo_flashcard(request):
-    if not request.user.is_authenticated:
-        return redirect('/usuarios/logar')
-
-    if request.method == 'GET':
+@method_decorator(
+    login_required(login_url='login', redirect_field_name='next'),
+    name='dispatch'
+)
+class NovoFlashcard(View):
+    def get(self, request):
         categoria = Categoria.objects.all()
         dificuldade = Flashcard.DIFICULDADE_CHOICES
         flashcards = Flashcard.objects.all()
@@ -36,10 +42,9 @@ def novo_flashcard(request):
                 'categoria': categoria,
                 'dificuldade': dificuldade,
                 'flashcards': flashcards
-            }
-        )
+            })
 
-    elif request.method == 'POST':
+    def post(self, request):
         pergunta = request.POST.get('pergunta')
         resposta = request.POST.get('resposta')
         categoria = request.POST.get('categoria')
@@ -71,25 +76,30 @@ def novo_flashcard(request):
         return redirect('/flashcard/novo_flashcard')
 
 
-def deletar_flashcard(request, id):
-    flashcard = Flashcard.objects.get(id=id)
+@method_decorator(
+    login_required(login_url='login', redirect_field_name='next'),
+    name='dispatch'
+)
+class DeletarFlashcard(View):
+    def get(self, request, id):
+        flashcard = get_object_or_404(Flashcard, id=id)
 
-    if request.user.id != flashcard.user.id:
+        if request.user.id != flashcard.user.id:
+            messages.add_message(
+                request,
+                constants.ERROR,
+                'Voce nao pode deletar esse flashcard!'
+            )
+            return redirect('/flashcard/novo_flashcard')
+
+        flashcard.delete()
         messages.add_message(
             request,
-            constants.ERROR,
-            'Voce nao pode deletar esse flashcard!'
+            constants.SUCCESS,
+            'Flashcard deletado com sucesso!'
         )
+
         return redirect('/flashcard/novo_flashcard')
-
-    flashcard.delete()
-    messages.add_message(
-        request,
-        constants.SUCCESS,
-        'Flashcard deletado com sucesso!'
-    )
-
-    return redirect('/flashcard/novo_flashcard')
 
 
 def iniciar_desafio(request):
