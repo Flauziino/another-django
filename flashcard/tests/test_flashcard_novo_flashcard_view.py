@@ -10,7 +10,7 @@ class NovoFlashcardViewTest(BaseTestMixin):
     def test_novo_flashcard_view_is_correct(self):
         view = resolve(reverse('novo_flashcard'))
 
-        self.assertIs(view.func.view_class, views.NovoFlashcard)
+        self.assertIs(view.func.view_class, views.NovoFlashcardView)
 
     def test_novo_flashcard_view_status_code_302_if_not_auth_user(self):
         url = reverse('novo_flashcard')

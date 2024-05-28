@@ -11,7 +11,7 @@ class ListarDesafioViewTest(BaseTestMixin):
     def test_listar_desafio_view_is_correct(self):
         view = resolve(reverse('listar_desafio'))
 
-        self.assertIs(view.func, views.listar_desafio)
+        self.assertIs(view.func.view_class, views.ListarDesafioView)
 
     def test_listar_desafio_view_with_auth_user_status_code_200_if_find_desafio(self):  # noqa:E501
         desafio = self.make_desafio()

@@ -1,22 +1,25 @@
-from .models import Categoria, Flashcard, FlashcardDesafio, Desafio
+from .models import (
+    Categoria, Flashcard,
+    FlashcardDesafio, Desafio
+)
 
 from django.views import View
 from django.http import Http404
 from django.contrib import messages
-
 from django.db.models import Q, Count, Value
 from django.contrib.messages import constants
-from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import TemplateView, DetailView
 from django.db.models.functions import Coalesce
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
 
 
 @method_decorator(
     login_required(login_url='login', redirect_field_name='next'),
     name='dispatch'
 )
-class NovoFlashcard(View):
+class NovoFlashcardView(View):
     def get(self, request):
         categoria = Categoria.objects.all()
         dificuldade = Flashcard.DIFICULDADE_CHOICES
@@ -80,7 +83,7 @@ class NovoFlashcard(View):
     login_required(login_url='login', redirect_field_name='next'),
     name='dispatch'
 )
-class DeletarFlashcard(View):
+class DeletarFlashcardView(View):
     def get(self, request, id):
         flashcard = get_object_or_404(Flashcard, id=id)
 
@@ -98,12 +101,15 @@ class DeletarFlashcard(View):
             constants.SUCCESS,
             'Flashcard deletado com sucesso!'
         )
-
         return redirect('/flashcard/novo_flashcard')
 
 
-def iniciar_desafio(request):
-    if request.method == 'GET':
+@method_decorator(
+    login_required(login_url='login', redirect_field_name='next'),
+    name='dispatch'
+)
+class IniciarDesafioView(View):
+    def get(self, request):
         categorias = Categoria.objects.all()
         dificuldades = Flashcard.DIFICULDADE_CHOICES
 
@@ -113,10 +119,10 @@ def iniciar_desafio(request):
             {
                 'categorias': categorias,
                 'dificuldades': dificuldades
-            },
+            }
         )
 
-    elif request.method == 'POST':
+    def post(self, request):
         titulo = request.POST.get('titulo')
         categorias = request.POST.getlist('categoria')
         dificuldade = request.POST.get('dificuldade')
@@ -151,19 +157,27 @@ def iniciar_desafio(request):
             flashcard_desafio.save()
             desafio.flashcards.add(flashcard_desafio)
 
-        desafio.save()
         return redirect('/flashcard/listar_desafio/')
 
 
-def listar_desafio(request):
-    if request.method == 'GET':
-        desafios = Desafio.objects.filter(user=request.user)
+@method_decorator(
+    login_required(login_url='login', redirect_field_name='next'),
+    name='dispatch'
+)
+class ListarDesafioView(TemplateView):
+    ordering = ['-id']
+    template_name = 'listar_desafio.html'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        desafios = Desafio.objects.filter(user=self.request.user)
         status = FlashcardDesafio.objects.all()
         categorias = Categoria.objects.all()
         dificuldades = Flashcard.DIFICULDADE_CHOICES
 
-        categoria_filtrar = request.GET.get('categoria')
-        dificuldade_filtrar = request.GET.get('dificuldade')
+        categoria_filtrar = self.request.GET.get('categoria')
+        dificuldade_filtrar = self.request.GET.get('dificuldade')
 
         if categoria_filtrar:
             desafios = desafios.filter(
@@ -175,26 +189,33 @@ def listar_desafio(request):
                 dificuldade=dificuldade_filtrar
             )
 
-        # talvez esse status vai precisar de um loop
-        return render(
-            request,
-            'listar_desafio.html',
-            {
-                'desafios': desafios,
-                'status': status,
-                'categorias': categorias,
-                'dificuldades': dificuldades,
-            },
-        )
+        ctx.update({
+            'desafios': desafios,
+            'status': status,
+            'categorias': categorias,
+            'dificuldades': dificuldades,
+        })
+        return ctx
 
 
-def desafio(request, id):
-    desafio = Desafio.objects.get(id=id)
+@method_decorator(
+    login_required(login_url='login', redirect_field_name='next'),
+    name='dispatch'
+)
+class DesafioView(DetailView):
+    model = Desafio
+    template_name = 'desafio.html'
+    pk_url_kwarg = 'id'
 
-    if not desafio.user == request.user:
-        raise Http404()
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
 
-    if request.method == 'GET':
+        id = self.kwargs.get('id')
+        desafio = self.model.objects.get(id=id)
+
+        if not desafio.user == self.request.user:
+            raise Http404()
+
         acertos = (
             desafio.flashcards.filter(respondido=True)
             .filter(acertou=True)
@@ -211,16 +232,14 @@ def desafio(request, id):
             .count()
         )
 
-        return render(
-            request,
-            'desafio.html',
-            {
-                'desafio': desafio,
-                'acertos': acertos,
-                'erros': erros,
-                'faltantes': faltantes
-            },
-        )
+        ctx.update({
+            'desafio': desafio,
+            'acertos': acertos,
+            'erros': erros,
+            'faltantes': faltantes
+        })
+
+        return ctx
 
 
 def responder_flashcard(request, id):
@@ -341,7 +360,5 @@ def relatorio(request, id):
             'dados2': dados2,
             'melhores': melhores,
             'piores': piores,
-            # 'acerto_categoria': acertos_categoria,
-            # 'erros_categoria': erros_categoria
         },
     )

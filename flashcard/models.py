@@ -16,7 +16,7 @@ class Flashcard(models.Model):
     user = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     pergunta = models.CharField(max_length=100)
     resposta = models.TextField()
-    categoria = models.ForeignKey(Categoria, on_delete=models.DO_NOTHING)
+    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
     dificuldade = models.CharField(max_length=1, choices=DIFICULDADE_CHOICES)
 
     def __str__(self):
@@ -35,7 +35,7 @@ class Flashcard(models.Model):
 
 
 class FlashcardDesafio(models.Model):
-    flashcard = models.ForeignKey(Flashcard, on_delete=models.DO_NOTHING)
+    flashcard = models.ForeignKey(Flashcard, on_delete=models.CASCADE)
 
     respondido = models.BooleanField(default=False)
     acertou = models.BooleanField(default=False)

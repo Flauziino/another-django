@@ -9,7 +9,7 @@ class DesafioViewTest(BaseTestMixin):
     def test_desafio_view_is_correct(self):
         view = resolve(reverse('desafio', kwargs={'id': 1}))
 
-        self.assertIs(view.func, views.desafio)
+        self.assertIs(view.func.view_class, views.DesafioView)
 
     def test_desafio_view_view_find_desafio_with_same_user_status_code_200(self):  # noqa:E501
         desafio = self.make_desafio()

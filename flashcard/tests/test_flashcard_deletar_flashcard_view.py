@@ -8,7 +8,7 @@ class DeletarFlashcardViewTest(BaseTestMixin):
     def test_deletar_flashcard_view_is_correct(self):
         view = resolve(reverse('deletar_flashcard', kwargs={'id': 1}))
 
-        self.assertIs(view.func, views.deletar_flashcard)
+        self.assertIs(view.func.view_class, views.DeletarFlashcardView)
 
     def test_deletar_flashcard_view_return_status_code_302_if_find_flashcard_and_delete(self):  # noqa:E501
         flashcard = self.make_flashcard()
