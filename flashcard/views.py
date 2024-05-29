@@ -242,123 +242,130 @@ class DesafioView(DetailView):
         return ctx
 
 
-def responder_flashcard(request, id):
-    flashcard_desafio = FlashcardDesafio.objects.get(id=id)
+class ResponderFlashcardView(View):
+    def get(self, request, id):
+        flashcard_desafio = FlashcardDesafio.objects.get(id=id)
 
-    acertou = request.GET.get('acertou')
-    desafio_id = request.GET.get('desafio_id')
+        acertou = request.GET.get('acertou')
+        desafio_id = request.GET.get('desafio_id')
 
-    if not flashcard_desafio.flashcard.user == request.user:
-        raise Http404()
+        if not flashcard_desafio.flashcard.user == request.user:
+            raise Http404()
 
-    flashcard_desafio.respondido = True
-    flashcard_desafio.acertou = True if acertou == '1' else False
-    flashcard_desafio.save()
+        flashcard_desafio.respondido = True
+        flashcard_desafio.acertou = True if acertou == '1' else False
+        flashcard_desafio.save()
 
-    return redirect(
-        f'/flashcard/desafio/{desafio_id}/'
-    )
-
-
-def relatorio(request, id):
-    desafio = Desafio.objects.get(id=id)
-
-    acertos = desafio.flashcards.filter(acertou=True).count()
-    erros = desafio.flashcards.filter(acertou=False).count()
-
-    dados = [acertos, erros]
-
-    categorias = desafio.categoria.all()
-
-    melhores = []
-    piores = []
-
-    categorias_com_dados = categorias.annotate(
-        total_flashcards=Count('flashcard'),
-        acertos=Coalesce(Count('flashcard__flashcarddesafio', filter=Q(
-            flashcard__flashcarddesafio__acertou=True)), Value(0)),
-        erros=Coalesce(Count('flashcard__flashcarddesafio', filter=Q(
-            flashcard__flashcarddesafio__acertou=False)), Value(0))
-    )
-
-    for categoria in categorias_com_dados:
-        total_flashcards = categoria.total_flashcards
-
-        if total_flashcards > 0:  # Para evitar divisão por zero
-            proporcao_acertos = categoria.acertos / total_flashcards
-
-            if proporcao_acertos >= 0.5:
-                melhores.append(
-                    {
-                        'nome': categoria.nome,
-                        'proporcao_acertos': proporcao_acertos,
-                        'acertos': categoria.acertos,
-                        'erros': categoria.erros
-                    }
-                )
-            else:
-                piores.append(
-                    {
-                        'nome': categoria.nome,
-                        'proporcao_acertos': proporcao_acertos,
-                        'acertos': categoria.acertos,
-                        'erros': categoria.erros
-                    }
-                )
-
-    # Preencher a lista de melhores com elementos vazios
-    # para manter o html exibindo sempre os 3 melhores
-    melhores.extend(
-        [{
-            'nome': 'N/A',
-            'proporcao_acertos': 0,
-            'acertos': 0,
-            'erros': 0
-        }] * (3 - len(melhores))
-    )
-
-    # Preencher a lista de piores com elementos vazios
-    # para manter o html exibindo sempre os 3 piores
-    piores.extend(
-        [{
-            'nome': 'N/A',
-            'proporcao_acertos': 0,
-            'acertos': 0,
-            'erros': 0
-        }] * (3 - len(piores))
-    )
-
-    # Classificar listas com base na proporção de acertos
-    melhores = sorted(
-        melhores, key=lambda x: x['proporcao_acertos'], reverse=True
-    )[:3]
-    piores = sorted(
-        piores, key=lambda x: x['proporcao_acertos']
-    )[:3]
-
-    nome_categoria = [i.nome for i in categorias]
-
-    nome_categoria = []
-    for i in categorias:
-        nome_categoria.append(i.nome)
-
-    dados2 = []
-    for categoria in categorias:
-        dados2.append(
-            desafio.flashcards.filter(flashcard__categoria=categoria)
-            .filter(acertou=True)
-            .count()
+        return redirect(
+            f'/flashcard/desafio/{desafio_id}/'
         )
 
-    return render(
-        request,
-        'relatorio.html',
-        {
+
+class RelatorioView(DetailView):
+    model = Desafio
+    template_name = 'relatorio.html'
+    pk_url_kwarg = 'id'
+
+    def get_context_data(self, *args, **kwargs):
+        ctx = super().get_context_data(*args, **kwargs)
+
+        id = self.kwargs.get('id')
+        desafio = Desafio.objects.get(id=id)
+
+        acertos = desafio.flashcards.filter(acertou=True).count()
+        erros = desafio.flashcards.filter(acertou=False).count()
+
+        dados = [acertos, erros]
+
+        categorias = desafio.categoria.all()
+
+        melhores = []
+        piores = []
+
+        categorias_com_dados = categorias.annotate(
+            total_flashcards=Count('flashcard'),
+            acertos=Coalesce(Count('flashcard__flashcarddesafio', filter=Q(
+                flashcard__flashcarddesafio__acertou=True)), Value(0)),
+            erros=Coalesce(Count('flashcard__flashcarddesafio', filter=Q(
+                flashcard__flashcarddesafio__acertou=False)), Value(0))
+        )
+
+        for categoria in categorias_com_dados:
+            total_flashcards = categoria.total_flashcards
+
+            if total_flashcards > 0:  # Para evitar divisão por zero
+                proporcao_acertos = categoria.acertos / total_flashcards
+
+                if proporcao_acertos >= 0.5:
+                    melhores.append(
+                        {
+                            'nome': categoria.nome,
+                            'proporcao_acertos': proporcao_acertos,
+                            'acertos': categoria.acertos,
+                            'erros': categoria.erros
+                        }
+                    )
+                else:
+                    piores.append(
+                        {
+                            'nome': categoria.nome,
+                            'proporcao_acertos': proporcao_acertos,
+                            'acertos': categoria.acertos,
+                            'erros': categoria.erros
+                        }
+                    )
+
+        # Preencher a lista de melhores com elementos vazios
+        # para manter o html exibindo sempre os 3 melhores
+        melhores.extend(
+            [{
+                'nome': 'N/A',
+                'proporcao_acertos': 0,
+                'acertos': 0,
+                'erros': 0
+            }] * (3 - len(melhores))
+        )
+
+        # Preencher a lista de piores com elementos vazios
+        # para manter o html exibindo sempre os 3 piores
+        piores.extend(
+            [{
+                'nome': 'N/A',
+                'proporcao_acertos': 0,
+                'acertos': 0,
+                'erros': 0
+            }] * (3 - len(piores))
+        )
+
+        # Classificar listas com base na proporção de acertos
+        melhores = sorted(
+            melhores, key=lambda x: x['proporcao_acertos'], reverse=True
+        )[:3]
+        piores = sorted(
+            piores, key=lambda x: x['proporcao_acertos']
+        )[:3]
+
+        nome_categoria = [i.nome for i in categorias]
+
+        nome_categoria = []
+        for i in categorias:
+            nome_categoria.append(i.nome)
+
+        dados2 = []
+        for categoria in categorias:
+            dados2.append(
+                desafio.flashcards.filter(flashcard__categoria=categoria)
+                .filter(acertou=True)
+                .count()
+            )
+
+        ctx.update({
             'desafio': desafio,
             'dados': dados,
             'categorias': nome_categoria,
             'dados2': dados2,
             'melhores': melhores,
             'piores': piores,
-        },
-    )
+        })
+
+        return ctx

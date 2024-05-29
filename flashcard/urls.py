@@ -30,12 +30,12 @@ urlpatterns = [
     ),
     path(
         'responder_flashcard/<int:id>/',
-        views.responder_flashcard,
+        views.ResponderFlashcardView.as_view(),
         name='responder_flashcard'
     ),
     path(
         'relatorio/<int:id>/',
-        views.relatorio,
+        views.RelatorioView.as_view(),
         name='relatorio'
     ),
 ]

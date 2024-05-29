@@ -9,7 +9,7 @@ class ResponderFlashcardViewTest(BaseTestMixin):
     def test_responder_flashcard_view_is_correct(self):
         view = resolve(reverse('responder_flashcard', kwargs={'id': 1}))
 
-        self.assertIs(view.func, views.responder_flashcard)
+        self.assertIs(view.func.view_class, views.ResponderFlashcardView)
 
     def test_responder_flashcard_view_redirect_status_code_302(self):
         flashcard_desafio = self.make_flashcard_desafio()
