@@ -9,7 +9,7 @@ class RelatorioViewTest(BaseTestMixin):
     def test_relatorio_view_is_correct(self):
         view = resolve(reverse('relatorio', kwargs={'id': 1}))
 
-        self.assertIs(view.func, views.relatorio)
+        self.assertIs(view.func.view_class, views.RelatorioView)
 
     def test_relatorio_view_status_code_200_if_find_desafio(self):
         desafio = self.make_desafio()

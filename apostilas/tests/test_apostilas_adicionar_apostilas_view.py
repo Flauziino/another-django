@@ -9,7 +9,7 @@ class AdicionarApostilasViewTest(BaseTestMixin):
     def test_adicionar_apostila_view_is_correct(self):
         view = resolve(reverse('adicionar_apostilas'))
 
-        self.assertIs(view.func, views.adicionar_apostilas)
+        self.assertIs(view.func.view_class, views.AdicionarApostilasView)
 
     def test_adicionar_apostila_view_method_get_return_status_code_200(self):
         apostila = self.make_apostila()

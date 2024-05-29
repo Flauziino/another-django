@@ -1,29 +1,44 @@
-from django.shortcuts import render, redirect
 from .models import Apostila, ViewApostila, Avaliacao
+
+from django.shortcuts import render, redirect
 from django.contrib.messages import constants
 from django.contrib import messages
+from django.views import View
 
 
-def adicionar_apostilas(request):
-    apostilas = Apostila.objects.filter(user=request.user)
-    apostila_tag = None
-    views_totais = (
-        ViewApostila.objects.filter(apostila__user=request.user)
-        .count()
-    )
-    if request.method == 'GET':
+class AdicionarApostilasView(View):
+    def get_render(self, apostilas=None, views_totais=None, apostila_tag=None):
+        ctx = {
+            'apostilas': apostilas,
+            'views_totais': views_totais,
+            'apostila_tag': apostila_tag
+        }
 
         return render(
-            request,
+            self.request,
             'adicionar_apostilas.html',
-            {
-                'apostilas': apostilas,
-                'views_totais': views_totais
-            }
+            ctx
         )
 
-    elif request.method == 'POST':
+    def get(self, request):
+        apostilas = Apostila.objects.filter(user=request.user)
+        views_totais = (
+            ViewApostila.objects.filter(apostila__user=request.user)
+            .count()
+        )
+
+        return self.get_render(
+            apostilas,
+            views_totais
+        )
+
+    def post(self, request):
         busca = request.POST.get('tags', '')
+        apostilas = Apostila.objects.filter(user=request.user)
+        views_totais = (
+            ViewApostila.objects.filter(apostila__user=request.user)
+            .count()
+        )
         apostila_tag = Apostila.objects.filter(titulo__icontains=busca)
 
         if 'arquivo' in request.FILES:
@@ -61,63 +76,55 @@ def adicionar_apostilas(request):
                 'adicionar_apostilas'
             )
 
-        return render(
-            request,
-            'adicionar_apostilas.html',
-            {
-                'apostilas': apostilas,
-                'views_totais': views_totais,
-                'apostila_tag': apostila_tag
-            }
+        return self.get_render(
+            apostilas,
+            views_totais,
+            apostila_tag
         )
 
 
-def apostila(request, id):
-    apostila = Apostila.objects.get(id=id)
-    total_avaliacoes = Avaliacao.objects.count()
-
-    # Inicializa as variáveis fora dos blocos condicionais
-    proporcao_ruim, proporcao_bom, proporcao_otimo = 0, 0, 0
-    views_unicas, views_totais = 0, 0  # Inicializa as variáveis aqui
-    maior_avaliacao = ''  # Inicializa como string vazia
-
-    if request.method == 'POST':
+class ApostilaView(View):
+    def post(self, request, id):
         avaliacao = request.POST.get('avaliacao')
 
         if avaliacao in ['ruim', 'bom', 'otimo']:
             Avaliacao.objects.create(avaliacao=avaliacao)
+
             return redirect('apostila', id=id)
 
-    avaliacoes_ruim = Avaliacao.objects.filter(avaliacao='ruim').count()
-    proporcao_ruim = (
-        avaliacoes_ruim / total_avaliacoes if total_avaliacoes > 0 else 0
-    )
+    def get(self, request, id):
+        apostila = Apostila.objects.get(id=id)
+        total_avaliacoes = Avaliacao.objects.count()
 
-    avaliacoes_bom = Avaliacao.objects.filter(avaliacao='bom').count()
-    proporcao_bom = (
-        avaliacoes_bom / total_avaliacoes if total_avaliacoes > 0 else 0
-    )
+        avaliacoes_ruim = Avaliacao.objects.filter(avaliacao='ruim').count()
+        proporcao_ruim = (
+            avaliacoes_ruim / total_avaliacoes if total_avaliacoes > 0 else 0
+        )
 
-    avaliacoes_otimo = Avaliacao.objects.filter(avaliacao='otimo').count()
-    proporcao_otimo = (
-        avaliacoes_otimo / total_avaliacoes if total_avaliacoes > 0 else 0
-    )
+        avaliacoes_bom = Avaliacao.objects.filter(avaliacao='bom').count()
+        proporcao_bom = (
+            avaliacoes_bom / total_avaliacoes if total_avaliacoes > 0 else 0
+        )
 
-    # Encontrar a avaliação com a maior proporção
-    proporcoes = {
-        'ruim': proporcao_ruim,
-        'bom': proporcao_bom,
-        'otimo': proporcao_otimo
-    }
-    maior_avaliacao = max(proporcoes, key=proporcoes.get)
+        avaliacoes_otimo = Avaliacao.objects.filter(avaliacao='otimo').count()
+        proporcao_otimo = (
+            avaliacoes_otimo / total_avaliacoes if total_avaliacoes > 0 else 0
+        )
 
-    if request.method == "GET":
+        # Encontrar a avaliação com a maior proporção
+        proporcoes = {
+            'ruim': proporcao_ruim,
+            'bom': proporcao_bom,
+            'otimo': proporcao_otimo
+        }
+        maior_avaliacao = max(proporcoes, key=proporcoes.get)
+
         view = ViewApostila(
             ip=request.META['REMOTE_ADDR'],
             apostila=apostila
         )
-
         view.save()
+
         views_unicas = (
             ViewApostila.objects.filter(apostila=apostila)
             .values('ip')
@@ -129,17 +136,17 @@ def apostila(request, id):
             .count()
         )
 
-    return render(
-        request,
-        'apostila.html',
-        {
-            'apostila': apostila,
-            'views_unicas': views_unicas,
-            'views_totais': views_totais,
-            'total_avaliacoes': total_avaliacoes,
-            'proporcao_ruim': proporcao_ruim,
-            'proporcao_bom': proporcao_bom,
-            'proporcao_otimo': proporcao_otimo,
-            'maior_avaliacao': maior_avaliacao,
-        }
-    )
+        return render(
+            request,
+            'apostila.html',
+            {
+                'apostila': apostila,
+                'views_unicas': views_unicas,
+                'views_totais': views_totais,
+                'total_avaliacoes': total_avaliacoes,
+                'proporcao_ruim': proporcao_ruim,
+                'proporcao_bom': proporcao_bom,
+                'proporcao_otimo': proporcao_otimo,
+                'maior_avaliacao': maior_avaliacao,
+            }
+        )

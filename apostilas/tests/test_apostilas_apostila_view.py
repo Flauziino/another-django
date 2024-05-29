@@ -9,7 +9,7 @@ class ApostilaViewTest(BaseTestMixin):
     def test_apostila_view_is_correct(self):
         view = resolve(reverse('apostila', kwargs={'id': 1}))
 
-        self.assertIs(view.func, views.apostila)
+        self.assertIs(view.func.view_class, views.ApostilaView)
 
     def test_apostila_view_method_get_return_status_code_200(self):
         apostila = self.make_apostila()
@@ -116,10 +116,33 @@ class ApostilaViewTest(BaseTestMixin):
         user = apostila.user
         self.client.force_login(user)
 
+        data = {
+            'avaliacao': 'bom'
+        }
+
         url = reverse('apostila', kwargs={'id': apostila.id})
-        response = self.client.post(url)
+        response = self.client.post(url, data=data, follow=True)
 
         self.assertEqual(response.status_code, 200)
+
+    def test_apostila_view_method_post_raises_value_error_if_avaliacao_not_in_ruim_bom_or_otimo(self):  # noqa:E501
+        apostila = self.make_apostila()
+        user = apostila.user
+        self.client.force_login(user)
+
+        data = {
+            'avaliacao': 'test'
+        }
+
+        url = reverse('apostila', kwargs={'id': apostila.id})
+
+        with self.assertRaises(ValueError) as context:
+            self.client.post(url, data=data, follow=True)
+
+        self.assertIn(
+            "The view apostilas.views.view didn't return an HttpResponse object. It returned None instead.",  # noqa:E501
+            str(context.exception)
+        )
 
     def test_apostila_view_method_post_receive_avaliacao_and_create_avaliacao_and_redirects(self):  # noqa:E501
         apostila = self.make_apostila()
