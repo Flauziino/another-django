@@ -9,7 +9,7 @@ class LogoutViewTest(BaseTestMixin):
     def test_logout_view_is_correct(self):
         view = resolve(reverse('logout'))
 
-        self.assertIs(view.func, views.logout)
+        self.assertIs(view.func.view_class, views.LogoutView)
 
     def test_logout_view_logout_user_and_redirect(self):
         user = self.get_user()

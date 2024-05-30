@@ -12,7 +12,7 @@ class CadastroViewTest(BaseTestMixin):
     def test_cadastro_view_is_correct(self):
         view = resolve(reverse('cadastro'))
 
-        self.assertIs(view.func, views.cadastro)
+        self.assertIs(view.func.view_class, views.CadastroView)
 
     def test_cadastro_view_method_get_status_code_200(self):
         url = reverse('cadastro')

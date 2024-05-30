@@ -1,19 +1,17 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
 from django.contrib.messages import constants
+from django.contrib.auth.models import User
 from django.contrib import messages
-from django.urls import reverse
 from django.contrib import auth
+from django.urls import reverse
+from django.views import View
 
 
-def cadastro(request):
-    if request.method == 'GET':
-        return render(
-            request,
-            'cadastro.html'
-        )
+class CadastroView(View):
+    def get(self, request):
+        return render(request, 'cadastro.html')
 
-    elif request.method == 'POST':
+    def post(self, request):
         # pegando um dado por vez do form
         # dentro do get usa o nome que foi dado ao input
         username = request.POST.get('username')
@@ -53,21 +51,18 @@ def cadastro(request):
             )
             return redirect(reverse('login'))
 
-        except:
+        except:  # noqa: E722
             messages.add_message(
                 request, constants.ERROR, 'Erro interno do servidor'
             )
             return redirect(reverse('cadastro'))
 
 
-def logar(request):
-    if request.method == 'GET':
-        return render(
-            request,
-            'login.html'
-        )
+class LogarView(View):
+    def get(self, request):
+        return render(request, 'login.html')
 
-    elif request.method == 'POST':
+    def post(self, request):
         username = request.POST.get('username')
         senha = request.POST.get('senha')
 
@@ -98,12 +93,13 @@ def logar(request):
             return redirect(reverse('login'))
 
 
-def logout(request):
-    auth.logout(request)
+class LogoutView(View):
+    def get(self, request):
+        auth.logout(request)
 
-    messages.add_message(
-        request,
-        constants.SUCCESS,
-        'Usuario deslogado com sucesso, volte sempre!'
-    )
-    return redirect(reverse('login'))
+        messages.add_message(
+            request,
+            constants.SUCCESS,
+            'Usuario deslogado com sucesso, volte sempre!'
+        )
+        return redirect(reverse('login'))

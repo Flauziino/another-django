@@ -9,7 +9,7 @@ class LogarViewTest(BaseTestMixin):
     def test_logar_view_is_correct(self):
         view = resolve(reverse('login'))
 
-        self.assertIs(view.func, views.logar)
+        self.assertIs(view.func.view_class, views.LogarView)
 
     def test_logar_view_status_code_200(self):
         url = reverse('login')
